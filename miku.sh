@@ -18,7 +18,7 @@ if [[ ! -e /dev/net/tun ]]; then
 	exit
 fi
 echo "
-AUTOSCRIPT BY RZ MOBILE SERVICE [NSWIRCZ]
+AUTOSCRIPT BY Hajimxmiku
 
 PLEASE CANCEL ALL PACKAGE POPUP
 
