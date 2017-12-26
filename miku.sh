@@ -272,7 +272,7 @@ chkconfig squid3 on
 chkconfig fail2ban on
 clear
 echo "========================================"  | tee -a log-install.txt
-echo "Service Autoscript VPS (RZ Mobile Service)"  | tee -a log-install.txt
+echo "Service Autoscript VPS (Hajimxmiku)"  | tee -a log-install.txt
 echo "----------------------------------------"  | tee -a log-install.txt
 echo ""  | tee -a log-install.txt
 echo "nginx : http://$myip:80"   | tee -a log-install.txt
