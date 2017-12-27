@@ -87,7 +87,7 @@ sed -i 's/ssl=1/ssl=0/g' /etc/webmin/miniserv.conf
 # ssh
 sed -i 's/#Banner/Banner/g' /etc/ssh/sshd_config
 sed -i 's/AcceptEnv/#AcceptEnv/g' /etc/ssh/sshd_config
-wget -O /etc/issue.net "http://files.rzvpn.net/rz/banner"
+wget -O /etc/issue.net "https://raw.githubusercontent.com/hajimxmiku/carding/master/banner"
 # dropbear
 apt-get -y install dropbear
 wget -O /etc/default/dropbear "http://files.rzvpn.net/rz/dropbear"
@@ -103,7 +103,7 @@ rm /etc/nginx/sites-enabled/default
 rm /etc/nginx/sites-available/default
 wget -O /etc/nginx/nginx.conf "http://files.rzvpn.net/rz/nginx.conf"
 mkdir -p /home/vps/public_html
-echo "<pre>Setup by meow | telegram @nswircz | whatsapp +60176218006</pre>" > /home/vps/public_html/index.php
+echo "<pre>Setup by meow | telegram t.me/systemless_root</pre>" > /home/vps/public_html/index.php
 echo "<?php phpinfo(); ?>" > /home/vps/public_html/info.php
 wget -O /etc/nginx/conf.d/vps.conf "http://files.rzvpn.net/rz/vps.conf"
 sed -i 's/listen = \/var\/run\/php5-fpm.sock/listen = 127.0.0.1:9000/g' /etc/php5/fpm/pool.d/www.conf
