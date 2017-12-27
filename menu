@@ -1,0 +1,313 @@
+#!/bin/bash
+
+function create_user() {
+	read -p "Enter username : " uname
+	egrep "^$uname" /etc/passwd >/dev/null
+	if [ $? -eq 0 ]; then
+	echo "Username [$uname] already register!"
+	exit 1
+	else
+	read -p "Enter password : " pass
+	read -p "Enter day expired ( 30 [ for 1 month ] ) : " expdate
+	today="$(date +"%Y-%m-%d")"
+	expire=$(date -d "$expdate days" +"%Y-%m-%d")
+	useradd -M -N -s /bin/false -e $expire $uname
+	echo $uname:$pass | chpasswd
+	myip=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0' | head -n1`;
+	myip2="s/xxxxxxxxx/$myip/g";
+	echo " ";
+	echo " ";
+	echo " ";
+	echo " ";
+	echo "System by miku
+
+For support:-
+telegram: t.me/systemless_root
+
+";
+	echo "Details for you account";
+	echo " ";
+	echo "Username : $uname";
+	echo "Password : $pass";
+	echo "Expired Date : $(date -d "$expdate days" +"%d-%m-%Y")";
+	echo " ";
+	echo "[ TQ buying an account from server.mikuvpn.com ]";
+	echo " ";
+	echo " ";
+	echo " ";
+	echo " ";
+	fi
+}
+
+function renew_user() {
+    read -p "Enter username to renew: " uname
+    egrep "^$uname" /etc/passwd >/dev/null
+	if [ $? -eq 1 ]; then
+	echo "Username [$uname] does not exits!"
+	exit 1
+	else
+    read -p "Enter day expired ( 30 [ for 1 month ] ) : " expdate
+    today="$(date +"%Y-%m-%d")"
+	expire=$(date -d "$expdate days" +"%Y-%m-%d")
+    usermod -e $expire $uname
+	echo " ";
+	echo " ";
+	echo " ";
+	echo " ";
+	echo " ";
+	echo "System by miku
+
+For support:-
+telegram: t.me/systemless_root
+
+";
+	echo "Details for you account renew";
+	echo " ";
+	echo "Username : $uname";
+	echo "New Expired Date : $(date -d "$expdate days" +"%d-%m-%Y")";
+	echo " ";
+	echo "[ TQ renew you account from miku ]";
+	echo " ";
+	echo " ";
+	echo " ";
+	echo " ";
+	echo " ";
+	fi
+}
+
+function delete_user(){
+	read -p "Enter username to be removed: " uname
+	userdel $uname > /dev/null 2>&1
+	egrep "^$uname" /etc/passwd >/dev/null
+	if [ $? -eq 1 ]; then
+	echo "Username [$uname] does not exits!"
+	exit 1
+	else
+	echo "Done delete $uname";
+	fi
+}
+
+function mon_ssh(){
+echo "-------------------------------------------------------------"
+echo " Date-Time    |    PID   |    User Name    |     Dari IP "
+echo "-------------------------------------------------------------"
+
+data=( `ps aux | grep -i dropbear | awk '{print $2}'`);
+
+echo "=================[ Checking Dropbear login ]=================";
+echo "-------------------------------------------------------------"
+
+for PID in "${data[@]}"
+do
+	#echo "check $PID";
+	NUM=`cat /var/log/auth.log | grep -i dropbear | grep -i "Password auth succeeded" | grep "dropbear\[$PID\]" | wc -l`;
+	USER=`cat /var/log/auth.log | grep -i dropbear | grep -i "Password auth succeeded" | grep "dropbear\[$PID\]" | awk -F" " '{print $10}'`;
+	IP=`cat /var/log/auth.log | grep -i dropbear | grep -i "Password auth succeeded" | grep "dropbear\[$PID\]" | awk -F" " '{print $12}'`;
+	waktu=`cat /var/log/auth.log | grep -i dropbear | grep -i "Password auth succeeded" | grep "dropbear\[$PID\]" | awk -F" " '{print $1,$2,$3}'`;
+	if [ $NUM -eq 1 ]; then
+		echo "$waktu - $PID - $USER - $IP";
+	fi
+done
+
+
+echo "-------------------------------------------------------------"
+
+data=( `ps aux | grep "\[priv\]" | sort -k 72 | awk '{print $2}'`);
+
+echo "==================[ Checking OpenSSH login ]=================";
+
+echo "-------------------------------------------------------------"
+for PID in "${data[@]}"
+do
+        #echo "check $PID";
+		NUM=`cat /var/log/auth.log | grep -i sshd | grep -i "Accepted password for" | grep "sshd\[$PID\]" | wc -l`;
+		USER=`cat /var/log/auth.log | grep -i sshd | grep -i "Accepted password for" | grep "sshd\[$PID\]" | awk '{print $9}'`;
+		IP=`cat /var/log/auth.log | grep -i sshd | grep -i "Accepted password for" | grep "sshd\[$PID\]" | awk '{print $11}'`;
+		waktu=`cat /var/log/auth.log | grep -i sshd | grep -i "Accepted password for" | grep "sshd\[$PID\]" | awk '{print $1,$2,$3}'`;
+        if [ $NUM -eq 1 ]; then
+                echo "$waktu - $PID - $USER - $IP";
+        fi
+done
+
+echo "-------------------------------------------------------------"
+echo -e "==============[ User Monitor Dropbear & OpenSSH]=============";
+}
+
+function user_list(){
+echo "---------------------------------------------"
+echo "BIL  USERNAME        STATUS       EXP DATE   "
+echo "---------------------------------------------"
+C=1
+ON=0
+OFF=0
+while read mumetndase
+do
+        AKUN="$(echo $mumetndase | cut -d: -f1)"
+        ID="$(echo $mumetndase | grep -v nobody | cut -d: -f3)"
+        exp="$(chage -l $AKUN | grep "Account expires" | awk -F": " '{print $2}')"
+        online="$(cat /etc/openvpn/openvpn-status.log | grep -Eom 1 $AKUN | grep -Eom 1 $AKUN)"
+        if [[ $ID -ge 500 ]]; then
+        if [[ -z $online ]]; then
+        printf "%-4s %-15s %-10s %-3s\n" "$C." "$AKUN" "OFFLINE" "$exp"
+        OFF=$((OFF+1))
+        else
+        printf "%-4s %-15s %-10s %-3s\n" "$C." "$AKUN" "ONLINE" "$exp"
+        ON=$((ON+1))
+        fi
+        C=$((C+1))
+        fi
+JUMLAH="$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)"
+done < /etc/passwd
+echo "--------------------------------------------------"
+echo " TOTAL USER : $JUMLAH    ONLINE : $ON     OFFLINE : $OFF"
+echo "--------------------------------------------------"
+}
+
+function expired_users(){
+echo "---------------------------------"
+echo "BIL  USERNAME          EXPIRED "
+echo "---------------------------------"
+count=1
+	cat /etc/shadow | cut -d: -f1,8 | sed /:$/d > /tmp/expirelist.txt
+	totalaccounts=`cat /tmp/expirelist.txt | wc -l`
+	for((i=1; i<=$totalaccounts; i++ )); do
+	tuserval=`head -n $i /tmp/expirelist.txt | tail -n 1`
+		username=`echo $tuserval | cut -f1 -d:`
+		userexp=`echo $tuserval | cut -f2 -d:`
+		userexpireinseconds=$(( $userexp * 86400 ))
+		todaystime=`date +%s`
+		expired="$(chage -l $username | grep "Account expires" | awk -F": " '{print $2}')"
+		if [ $userexpireinseconds -lt $todaystime ] ; then
+			printf "%-4s %-15s %-10s %-3s\n" "$count." "$username" "$expired"
+			count=$((count+1))
+		fi
+	done
+	echo "---------------------------------"
+	echo "  TOTAL NOT EXPIRED USER : $count "
+	echo "---------------------------------"
+rm -r /tmp/*.txt
+}
+
+function not_expired_users(){
+echo "---------------------------------"
+echo "BIL  USERNAME          EXPIRED "
+echo "---------------------------------"
+count=1
+    cat /etc/shadow | cut -d: -f1,8 | sed /:$/d > /tmp/expirelist.txt
+    totalaccounts=`cat /tmp/expirelist.txt | wc -l`
+    for((i=1; i<=$totalaccounts; i++ )); do
+    tuserval=`head -n $i /tmp/expirelist.txt | tail -n 1`
+        username=`echo $tuserval | cut -f1 -d:`
+        userexp=`echo $tuserval | cut -f2 -d:`
+        userexpireinseconds=$(( $userexp * 86400 ))
+        todaystime=`date +%s`
+        expired="$(chage -l $username | grep "Account expires" | awk -F": " '{print $2}')"
+        if [ $userexpireinseconds -gt $todaystime ] ; then
+        printf "%-4s %-15s %-10s %-3s\n" "$count." "$username" "$expired"
+        count=$((count+1))
+        fi
+    done
+	echo "---------------------------------"
+	echo "  TOTAL NOT EXPIRED USER : $count "
+	echo "---------------------------------"
+rm -r /tmp/*.txt
+}
+
+function used_data(){
+	myip=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0' | head -n1`
+	myint=`ifconfig | grep -B1 "inet addr:$myip" | head -n1 | awk '{print $1}'`
+	ifconfig $myint | grep "RX bytes" | sed -e 's/ *RX [a-z:0-9]*/Received: /g' | sed -e 's/TX [a-z:0-9]*/\nTransfered: /g'
+}
+
+clear
+echo "System by miku
+
+For support:-
+telegram: t.me/systemless_root
+
+";
+PS3='Please enter your choice: '
+options=(
+"Add User" "Renew User" "Delete User" "User List" "Users Not Expired" "Expired Users" "Current Monitor SSH Users" "Used Data By Users" "RAM VPS Status" "Change Password" "Change Dropbear Port" "Change OpenVPN Port" "Change Squid3 Port" "Restart Server" "Update Script" "Quit")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Add User")
+            create_user
+	        break
+            ;; 
+        "Renew User")
+            renew_user
+            break
+            ;;
+        "Delete User")
+            delete_user
+            break
+            ;;
+		"Current Monitor SSH Users")
+            mon_ssh
+            break
+            ;;		
+		"User List")
+            user_list
+            break
+            ;;	
+		"RAM VPS Status")
+		    free -h | grep -v + > /tmp/ramcache
+            cat /tmp/ramcache | grep -v "Swap"
+            break
+            ;;	
+		"Users Not Expired")
+			not_expired_users
+			break
+			;;
+		"Expired Users")
+			expired_users
+			break
+			;;
+		"Used Data By Users")
+			used_data
+			break
+			;;		
+		"Restart Server")
+			reboot
+			break
+			;;	
+		"Change Password")
+			passwd
+			break
+			;;
+		"Change OpenVPN Port")	
+            echo "What OpenVPN port would you like to change to?"
+            read -p "Port: " -e -i 1194 PORT
+            sed -i "s/port [0-9]*/port $PORT/" /etc/openvpn/server.conf
+            service openvpn restart
+            echo "OpenVPN Updated : Port $PORT"
+			break
+			;;
+		"Change Dropbear Port")	
+            echo "What Dropbear port would you like to change to?"
+            read -p "Port: " -e -i 443 PORT
+            sed -i "s/DROPBEAR_PORT=[0-9]*/DROPBEAR_PORT=$PORT/" /etc/default/dropbear
+            service dropbear restart
+            echo "Dropbear Updated : Port $PORT"
+			break
+			;;
+        "Change Squid3 Port")	
+            echo "What Squid3 port would you like to change to?"
+            read -p "Port: " -e -i 8080 PORT
+            sed -i "s/http_port [0-9]*/http_port $PORT/" /etc/squid3/squid.conf
+            service squid3 restart
+            echo "echo "Squid3 Updated : Port $PORT""
+			break
+			;;
+			"Update Script")
+			echo "your system is up to date!"
+			break
+			;;
+        "Quit")
+            break
+            ;;
+        *) echo invalid option;;
+    esac
+done
