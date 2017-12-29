@@ -138,7 +138,7 @@ service squid3 restart
 service fail2ban restart
 clear
 echo "========================================"  | tee -a log-install.txt
-echo "Service Autoscript VPS (Miku VPN) tee -a log-install.txt
+echo "Service Autoscript VPS (Miku VPN)" tee -a log-install.txt
 echo "----------------------------------------"  | tee -a log-install.txt
 echo ""  | tee -a log-install.txt
 echo "nginx : http://$myip:80"   | tee -a log-install.txt
