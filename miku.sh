@@ -146,7 +146,7 @@ echo "Webmin : http://$myip:10000/"  | tee -a log-install.txt
 echo "Squid3 : 8080"  | tee -a log-install.txt
 echo "OpenSSH : 22"  | tee -a log-install.txt
 echo "Dropbear : 443"  | tee -a log-install.txt
-echo "OpenVPN  : TCP 1194 (client config : http://$myip/client.ovpn)"  | tee -a log-install.txt
+echo "OpenVPN : TCP 1194(client config : http://$myip/client.ovpn)"  | tee -a log-install.txt
 echo "Fail2Ban : [on]"  | tee -a log-install.txt
 echo "AntiDDOS : [on]"  | tee -a log-install.txt
 echo "AntiTorrent : [on]"  | tee -a log-install.txt
