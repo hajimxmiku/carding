@@ -42,6 +42,34 @@ sed -i 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/g' /etc
 sysctl -p
 clear
 
+
+# disable ipv6
+echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+sed -i '$ i\echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6' /etc/rc.local
+#sed -i 's/net.ipv6.conf.all.disable_ipv6 = 0/net.ipv6.conf.all.disable_ipv6 = 1/g' /etc/sysctl.conf
+#sed -i 's/net.ipv6.conf.default.disable_ipv6 = 0/net.ipv6.conf.default.disable_ipv6 = 1/g' /etc/sysctl.conf
+#sed -i 's/net.ipv6.conf.lo.disable_ipv6 = 0/net.ipv6.conf.lo.disable_ipv6 = 1/g' /etc/sysctl.conf
+#sed -i 's/net.ipv6.conf.eth0.disable_ipv6 = 0/net.ipv6.conf.eth0.disable_ipv6 = 1/g' /etc/sysctl.conf
+#sysctl -p
+
+# install wget and curl
+apt-get update;apt-get -y install wget curl;
+apt-get install gem
+# set time GMT +7
+
+ln -fs /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime
+
+# set locale
+sed -i 's/AcceptEnv/#AcceptEnv/g' /etc/ssh/sshd_config
+service ssh restart
+
+# set repo
+wget -O /etc/apt/sources.list $source/debian7/sources.list.debian7
+wget http://www.dotdeb.org/dotdeb.gpg
+wget http://www.webmin.com/jcameron-key.asc
+cat dotdeb.gpg | apt-key add -;rm dotdeb.gpg
+cat jcameron-key.asc | apt-key add -;rm jcameron-key.asc
+
 if [ "`lsb_release -is`" == "Ubuntu" ] || [ "`lsb_release -is`" == "Debian" ]
 then
 echo "
@@ -56,7 +84,7 @@ apt-get -y --purge remove postfix*;
 apt-get -y --purge remove bind*;
 clear
 echo "
-UPDATE AND UPGRADE PROCESS 
+UPDATE AND UPGRADE PROCESS
 
 PLEASE WAIT TAKE TIME 1-5 MINUTE
 "
@@ -64,6 +92,62 @@ sh -c 'echo "deb http://download.webmin.com/download/repository sarge contrib" >
 wget -qO - http://www.webmin.com/jcameron-key.asc | apt-key add -
 apt-get update;
 apt-get -y upgrade;
+# update
+apt-get update;apt-get -y upgrade;
+
+# install webserver
+apt-get -y install nginx php5-fpm php5-cli
+apt-get -y install zip tar
+
+# install essential package
+#echo "mrtg mrtg/conf_mods boolean true" | debconf-set-selections
+#apt-get -y install bmon iftop htop nmap axel nano iptables traceroute sysv-rc-conf dnsutils bc nethogs openvpn vnstat less screen psmisc apt-file whois ptunnel ngrep mtr git zsh mrtg snmp snmpd snmp-mibs-downloader unzip unrar rsyslog debsums rkhunter
+apt-get -y install bmon iftop htop nmap axel nano iptables traceroute sysv-rc-conf dnsutils bc nethogs vnstat less screen psmisc apt-file whois ptunnel ngrep mtr git zsh unzip unrar rsyslog debsums rkhunter
+apt-get -y install build-essential
+
+# disable exim
+service exim4 stop
+sysv-rc-conf exim4 off
+
+# update apt-file
+apt-file update
+
+# setting vnstat
+vnstat -u -i $ether
+service vnstat restart
+
+# install screenfetch
+cd
+#wget $source/debian7/screenfetch-dev
+#mv screenfetch-dev /usr/bin/screenfetch
+#chmod +x /usr/bin/screenfetch
+#echo "clear" >> .profile
+#echo "screenfetch" >> .profile
+
+#text gambar
+apt-get install boxes
+
+# text pelangi
+sudo apt-get install ruby
+sudo gem install lolcat
+
+# text warna
+cd
+rm -rf /root/.bashrc
+wget -O /root/.bashrc $source/debian7/.bashrc
+
+# Install Web Server
+cd
+rm /etc/nginx/sites-enabled/default
+rm /etc/nginx/sites-available/default
+wget -O /etc/nginx/nginx.conf "https://raw.githubusercontent.com/muchigo/VPS/master/conf/nginx.conf"
+mkdir -p /home/vps/public_html
+echo "<pre>Setup by hajimxmiku</pre>" > /home/vps/public_html/index.html
+echo "<?php phpinfo(); ?>" > /home/vps/public_html/info.php
+wget -O /etc/nginx/conf.d/vps.conf "https://raw.githubusercontent.com/muchigo/VPS/master/conf/vps.conf"
+sed -i 's/listen = \/var\/run\/php5-fpm.sock/listen = 127.0.0.1:9000/g' /etc/php5/fpm/pool.d/www.conf
+service php5-fpm restart
+service nginx restart
 apt-get -y install wget curl;
 echo "
 INSTALLER PROCESS PLEASE WAIT
@@ -88,25 +172,88 @@ sed -i 's/ssl=1/ssl=0/g' /etc/webmin/miniserv.conf
 sed -i 's/#Banner/Banner/g' /etc/ssh/sshd_config
 sed -i 's/AcceptEnv/#AcceptEnv/g' /etc/ssh/sshd_config
 wget -O /etc/issue.net "https://raw.githubusercontent.com/hajimxmiku/carding/master/banner"
-# dropbear
-apt-get -y install dropbear
-wget -O /etc/default/dropbear "http://files.rzvpn.net/rz/dropbear"
+# install badvpn
+#wget -O /usr/bin/badvpn-udpgw $source/debian7/badvpn-udpgw
+#if [[ $OS == "x86_64" ]]; then
+#wget -O /usr/bin/badvpn-udpgw $source/debian7/badvpn-udpgw64
+#fi
+#sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300' /etc/rc.local
+#chmod +x /usr/bin/badvpn-udpgw
+#screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300
+cd
+
+# install mrtg
+#apt-get update;apt-get -y install snmpd;
+#wget -O /etc/snmp/snmpd.conf $source/debian7/snmpd.conf
+#wget -O /root/mrtg-mem.sh $source/debian7/mrtg-mem.sh
+#chmod +x /root/mrtg-mem.sh
+#cd /etc/snmp/
+#sed -i 's/TRAPDRUN=no/TRAPDRUN=yes/g' /etc/default/snmpd
+#service snmpd restart
+#snmpwalk -v 1 -c public localhost 1.3.6.1.4.1.2021.10.1.3.1
+#mkdir -p /home/vps/public_html/mrtg
+#cfgmaker --zero-speed 100000000 --global 'WorkDir: /home/vps/public_html/mrtg' --output /etc/mrtg.cfg public@localhost
+#curl $source/debian7/mrtg.conf >> /etc/mrtg.cfg
+#sed -i 's/WorkDir: \/var\/www\/mrtg/# WorkDir: \/var\/www\/mrtg/g' /etc/mrtg.cfg
+#sed -i 's/# Options\[_\]: growright, bits/Options\[_\]: growright/g' /etc/mrtg.cfg
+#indexmaker --output=/home/vps/public_html/mrtg/index.html /etc/mrtg.cfg
+#if [ -x /usr/bin/mrtg ] && [ -r /etc/mrtg.cfg ]; then mkdir -p /var/log/mrtg ; env LANG=C /usr/bin/mrtg /etc/mrtg.cfg 2>&1 | tee -a /var/log/mrtg/mrtg.log ; fi
+#if [ -x /usr/bin/mrtg ] && [ -r /etc/mrtg.cfg ]; then mkdir -p /var/log/mrtg ; env LANG=C /usr/bin/mrtg /etc/mrtg.cfg 2>&1 | tee -a /var/log/mrtg/mrtg.log ; fi
+#if [ -x /usr/bin/mrtg ] && [ -r /etc/mrtg.cfg ]; then mkdir -p /var/log/mrtg ; env LANG=C /usr/bin/mrtg /etc/mrtg.cfg 2>&1 | tee -a /var/log/mrtg/mrtg.log ; fi
+cd
+
+# setting port ssh
+#sed -i 's/Port 22/Port 22/g' /etc/ssh/sshd_config
+#sed -i '/Port 22/a Port 80' /etc/ssh/sshd_config
+#sed -i '/Port 22/a Port 143' /etc/ssh/sshd_config
+sed -i '/Port 22/a Port 143' /etc/ssh/sshd_config
+sed -i 's/Port 22/Port  22/g' /etc/ssh/sshd_config
+sed -i '$ i\Banner bannerssh' /etc/ssh/sshd_config
+service ssh restart
+
+# install dropbear
+#apt-get -y update
+#apt-get -y install dropbear
+#sed -i 's/NO_START=1/NO_START=0/g' /etc/default/dropbear
+#sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=443/g' /etc/default/dropbear
+#sed -i 's/DROPBEAR_EXTRA_ARGS=/DROPBEAR_EXTRA_ARGS="-p 109 -p 110"/g' /etc/default/dropbear
+#echo "/bin/false" >> /etc/shells
+#echo "/usr/sbin/nologin" >> /etc/shells
+#service ssh restart
+#service dropbear restart
+
+apt-get install dropbear
+sed -i 's/NO_START=1/NO_START=0/g' /etc/default/dropbear
+sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=80/g' /etc/default/dropbear
+sed -i 's/DROPBEAR_EXTRA_ARGS=/DROPBEAR_EXTRA_ARGS="-p 443"/g' /etc/default/dropbear
 echo "/bin/false" >> /etc/shells
 echo "/usr/sbin/nologin" >> /etc/shells
+sed -i 's/DROPBEAR_BANNER=""/DROPBEAR_BANNER="bannerssh"/g' /etc/default/dropbear
+service ssh restart
+service dropbear restart
+# bannerssh
+wget $source/debian7/bannerssh
+mv ./bannerssh /bannerssh
+chmod 0644 /bannerssh
+service dropbear restart
+service ssh restart
+
+# upgrade dropbear 2012.55
+apt-get install zlib1g-dev
+wget https://matt.ucc.asn.au/dropbear/releases/dropbear-2012.55.tar.bz2
+bzip2 -cd dropbear-2012.55.tar.bz2 | tar xvf -
+cd dropbear-2012.55
+./configure
+make && make install
+mv /usr/sbin/dropbear /usr/sbin/dropbear1
+ln /usr/local/sbin/dropbear /usr/sbin/dropbear
+service dropbear restart
+
 # squid3
 apt-get -y install squid3
 wget -O /etc/squid3/squid.conf "http://files.rzvpn.net/rz/squid.conf"
 sed -i "s/ipserver/$myip/g" /etc/squid3/squid.conf
-# nginx
-apt-get -y install nginx php5-fpm php5-cli libexpat1-dev libxml-parser-perl
-rm /etc/nginx/sites-enabled/default
-rm /etc/nginx/sites-available/default
-wget -O /etc/nginx/nginx.conf "http://files.rzvpn.net/rz/nginx.conf"
-mkdir -p /home/vps/public_html
-echo "<pre>Setup by miku | telegram t.me/systemless_root</pre>" > /home/vps/public_html/index.php
-echo "<?php phpinfo(); ?>" > /home/vps/public_html/info.php
-wget -O /etc/nginx/conf.d/vps.conf "http://files.rzvpn.net/rz/vps.conf"
-sed -i 's/listen = \/var\/run\/php5-fpm.sock/listen = 127.0.0.1:9000/g' /etc/php5/fpm/pool.d/www.conf
+
 # openvpn
 apt-get -y install openvpn
 cd /etc/openvpn/
@@ -172,7 +319,8 @@ yum -y remove remove samba*;
 yum -y remove remove apache2*;
 yum -y remove remove sendmail*;
 yum -y remove remove postfix*;
-yum -y remove remove bind*;
+yum -y remove remove bind9*;
+apt-get -y --purge remove dropbear*;
 clear
 echo "
 UPDATE AND UPGRADE PROCESS 
