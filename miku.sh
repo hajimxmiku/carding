@@ -42,6 +42,17 @@ sed -i 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/g' /etc
 sysctl -p
 clear
 
+#vps="zvur";
+vps="aneka";
+
+#if [[ $vps = "zvur" ]]; then
+	#source="http://"
+#else
+	source="https://raw.githubusercontent.com/syahz86/new"
+#fi
+
+# go to root
+cd
 
 # disable ipv6
 echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
