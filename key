@@ -1,0 +1,2 @@
+key=($(md5sum Miku-SSL.sh))
+echo $key
